@@ -1,5 +1,8 @@
 # electron-in-vue
 
+## node 
+10.2.1
+
 ## Project setup
 ```
 npm install
@@ -27,3 +30,27 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### 执行浏览器ui
+npm run serve
+
+### 执行electron视图
+npm run test
+
+### build成mac程序
+npm run build:mac
+
+
+### 排坑
+package.js文件
+```js
+  "build": {
+    "mac": {
+      "icon": "./yang.png" //图标文件
+    },
+    "extraResources":[{ //打包的时候移动目录到指定目录，不然会忽略打包，丢失文件，从丢失fork文件中发现的问题，
+      "from": "./src/worker/",
+      "to": "./src/worker/"
+    }]
+  },
+```
