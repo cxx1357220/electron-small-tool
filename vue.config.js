@@ -1,5 +1,5 @@
 const path = require('path');
-console.log(__dirname, 999)
+console.log(__dirname)
 module.exports = {
     // baseUrl:'./',
     publicPath: './',

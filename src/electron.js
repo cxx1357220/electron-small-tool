@@ -40,7 +40,7 @@ function createWindow() {
   })
   // webFrame.executeJavaScript('window.path = __dirname;')
 
-  console.log(process.env.NODE_ENV, 13)
+  // console.log(process.env.NODE_ENV, 13)
   // and load the index.html of the app.
   if (process.env.NODE_ENV === 'development') {
 
@@ -111,7 +111,7 @@ ipc.on('open-path-dialog', function (event, p) {
 })
 
 ipc.on('export', function (event, list, expPath, platform) {
-  // let fileList = fs.readdirSync(path.join(process.resourcesPath, 'app.asar'))
+  // let fileList = fs.readdirSync(path.join(process.resourcesPath, 'app.asar')) //查看build打包后'app.asar'文件内部路径
   // event.sender.send('console.log', fileList);
 
 

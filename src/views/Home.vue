@@ -98,15 +98,6 @@ export default {
       ipc.send("open-directory-dialog", "xlsx");
       if (this.lock) {
         this.lock = false;
-        this.files = this.files.filter((obj) => obj.newFilePath);
-        this.doneFiles = this.doneFiles.filter((obj) => {
-          return (
-            this.files.findIndex(
-              (item) => item.newFilePath == obj.newFilePath
-            ) == -1
-          );
-        });
-        this.doneFiles = this.files.concat(this.doneFiles);
         this.files = [];
       }
     },
@@ -132,7 +123,12 @@ export default {
     exportFile() {
       this.loading = true;
       this.lock = true;
-      ipc.send("export", this.files, this.path,navigator.platform.indexOf('Mac')!==-1);
+      ipc.send(
+        "export",
+        this.files,
+        this.path,
+        navigator.platform.indexOf("Mac") !== -1
+      );
     },
     delList(idx) {
       this.files.splice(idx, 1);
@@ -160,7 +156,8 @@ export default {
         let newFileList = files.map((a) => {
           this.files = this.files.filter((obj) => obj.path !== a);
           let arr;
-          if (navigator.platform.indexOf('Mac')!==-1) { //mac路径为/windows路径为\
+          if (navigator.platform.indexOf("Mac") !== -1) {
+            //mac路径为/windows路径为\
             arr = a.split("/");
           } else {
             arr = a.split("\\");
@@ -192,6 +189,15 @@ export default {
           } else {
             this.$message({ message: "转换完毕", type: "success" });
           }
+          this.files = this.files.filter((obj) => obj.newFilePath);
+          this.doneFiles = this.doneFiles.filter((obj) => {
+            return (
+              this.files.findIndex(
+                (item) => item.newFilePath == obj.newFilePath
+              ) == -1
+            );
+          });
+          this.doneFiles = this.files.concat(this.doneFiles);
           // let message =
           //     "转换完毕" +
           //     (this.errorCount ? "," + this.errorCount + "条错误。" : ""),
