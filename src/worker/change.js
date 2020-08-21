@@ -1,7 +1,8 @@
-const path = require('path')
+// const path = require('path')
 const fs = require('fs')
-const xlsx = require('node-xlsx');  // 互相转换都可以
-process.on('message', function ([list, expPath]) {
+const xlsx = require('node-xlsx');  // 互相转换都可以 ,在这写打包会有问题，引用不到，
+process.on('message', function ({list, expPath,platform}) {
+  let filePathSplit=platform?'/':'\\';
   for (let idx = 0; idx < list.length; idx++) {
     let file = list[idx];
     process.send([idx, 0, {}]);
@@ -19,7 +20,7 @@ process.on('message', function ([list, expPath]) {
               const str = xlsx.build(data);
               process.send([idx, 70, {}]);
               let newName = file.name + 'ToXlsx.xlsx'
-              let newFilePath = expPath + '/' + newName;
+              let newFilePath = expPath + filePathSplit + newName;
               // fs.writeFileSync(newFilePath, str, 'binary');
               fs.writeFile(newFilePath, str, function (err) {
                 if (err) {
@@ -44,10 +45,10 @@ process.on('message', function ([list, expPath]) {
         const json = xlsx.parse(file.path, { raw: true });  //把内容都当string类型
         process.send([idx, 70, {}]);
         let newName = file.name + 'ToJson.json';
-        let newFilePath = expPath + '/' + newName;
+        let newFilePath = expPath + filePathSplit + newName;
         fs.writeFile(newFilePath, JSON.stringify(json), function (err) {
           if (err) {
-            process.send([idx, 'error', { error: "文件写入失败" }]);
+            process.send([idx, 'error', { error: "文件写入失败"+err }]);
           } else {
             process.send([idx, 100, { newName, newFilePath }]);
           }

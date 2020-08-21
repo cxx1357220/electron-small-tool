@@ -34,10 +34,15 @@
             @click="exportFile"
             type="primary"
             :loading="loading"
-            :disabled="lock"
+            :disabled="lock||!path"
             icon="el-icon-document-copy"
           >转换</el-button>
-          <el-button size="mini" @click="openFinder(path)" icon="el-icon-folder-opened">打开路径</el-button>
+          <el-button
+            size="mini"
+            @click="openFinder(path)"
+            :disabled="!path"
+            icon="el-icon-folder-opened"
+          >打开路径</el-button>
         </div>
 
         <div class="file-box">
@@ -94,7 +99,7 @@ export default {
       if (this.lock) {
         this.lock = false;
         this.files = this.files.filter((obj) => obj.newFilePath);
-        this.doneFiles.filter((obj) => {
+        this.doneFiles = this.doneFiles.filter((obj) => {
           return (
             this.files.findIndex(
               (item) => item.newFilePath == obj.newFilePath
@@ -107,13 +112,18 @@ export default {
     },
     openFinder(path, file) {
       console.log(path);
-      let callBack = electron.shell.showItemInFolder(path);
+      // window.shell = electron.shell;
+      let callBack = ipc.sendSync("hasPath", path); //同步判断是否存在文件夹，build:mac后showItemInFolder无返回值。。。shell别的方法都有返回值，无语了。
       if (!callBack) {
         if (!file) {
           this.$message("找不到此文件夹");
         } else {
           this.$message("找不到此文件");
         }
+      } else {
+        // let callBack = electron.shell.showItemInFolder(path);
+        // console.log(callBack); //build:mac后无返回值。。。
+        electron.shell.showItemInFolder(path);
       }
     },
     setPath() {
@@ -122,7 +132,7 @@ export default {
     exportFile() {
       this.loading = true;
       this.lock = true;
-      ipc.send("export", this.files, this.path);
+      ipc.send("export", this.files, this.path,navigator.platform.indexOf('Mac')!==-1);
     },
     delList(idx) {
       this.files.splice(idx, 1);
@@ -138,17 +148,25 @@ export default {
     },
   },
   created() {
+    this.path = localStorage.getItem("path") || "";
     ipc.on("path", (event, path) => {
       if (path) {
         this.path = path;
+        localStorage.setItem("path", path);
       }
     });
     ipc.on("files", (event, files) => {
       if (files) {
         let newFileList = files.map((a) => {
           this.files = this.files.filter((obj) => obj.path !== a);
-          let arr = a.split("/"),
-            name = arr[arr.length - 1];
+          let arr;
+          if (navigator.platform.indexOf('Mac')!==-1) { //mac路径为/windows路径为\
+            arr = a.split("/");
+          } else {
+            arr = a.split("\\");
+          }
+          let name = arr[arr.length - 1];
+          console.log(a, arr, name);
           return {
             path: a,
             name: name,
@@ -159,7 +177,7 @@ export default {
     });
 
     ipc.on("console.log", (event, log) => {
-        console.log(log);
+      console.log(log);
     });
 
     ipc.on("files-progress", (event, i, val, newNameObj) => {
@@ -243,7 +261,8 @@ export default {
         color: #f56c6c;
         font-size: 12px;
       }
-      & >label,& >div{
+      & > label,
+      & > div {
       }
       & > span {
         flex: 1;
