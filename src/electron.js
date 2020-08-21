@@ -7,12 +7,12 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const { fork } = require('child_process');
 const path = require('path')
-
+const fs = require('fs')
+const xlsx = require('node-xlsx');
 const ipc = electron.ipcMain;
 const dialog = electron.dialog;
 // const excelPort = require('excel-export');
 // const json2xls = require('json2xls');
-
 
 
 
@@ -84,6 +84,9 @@ app.on('activate', function () {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow()
 })
+ipc.on('hasPath', function (event, path) {
+  event.returnValue = fs.existsSync(path) //同步返回值
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
@@ -107,13 +110,17 @@ ipc.on('open-path-dialog', function (event, p) {
   // 很奇怪，loadURL走内部function，loadFILE走外部promise
 })
 
-ipc.on('export', function (event, list, expPath) {
-  
+ipc.on('export', function (event, list, expPath, platform) {
+  // let fileList = fs.readdirSync(path.join(process.resourcesPath, 'app.asar'))
+  // event.sender.send('console.log', fileList);
+
+
+
   let isDev = process.env.NODE_ENV === 'development' //判断是否为测试环境，生产环境需要更改获取路径
-  let scriptPath = isDev ? './src/worker/change.js' : path.join(process.resourcesPath, 'src/worker/change.js');
+  let scriptPath = isDev ? './src/worker/change.js' : path.join(process.resourcesPath, 'app.asar/src/worker/change.js'); //有一说一，这个asar就很弱智,路径极其奇怪
   const forked = fork(scriptPath);
   let len = 0;
-  event.sender.send('console.log', forked); //f发送到前端log
+  // event.sender.send('console.log', forked); //f发送到前端log
   // console.log(forked,'forked') //查看占用端口
   forked.on('message', function (e) {
     if (e[1] == 100 || e[1] == 'error') {
@@ -132,7 +139,7 @@ ipc.on('export', function (event, list, expPath) {
     event.sender.send('console.log', 'exit');
     console.log('子进程已关闭，退出码 ' + code);
   });
-  forked.send([list, expPath])
+  forked.send({ list, expPath, platform })
 })
 
 ipc.on('open-directory-dialog', function (event, p) {
@@ -177,7 +184,6 @@ ipc.on('open-directory-dialog', function (event, p) {
     if (files) { event.sender.send('files', files); }
   })
     .then(files => {
-      console.log(files, 123)
       if (files) { event.sender.send('files', files.filePaths); }
     }).catch(err => {
       console.log(err)

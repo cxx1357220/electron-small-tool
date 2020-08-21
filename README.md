@@ -37,8 +37,9 @@ npm run serve
 ### 执行electron视图
 npm run test
 
-### build成mac程序
+### build成程序
 npm run build:mac
+npm run build:win
 
 
 ### 排坑
