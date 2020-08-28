@@ -189,15 +189,15 @@ export default {
           } else {
             this.$message({ message: "转换完毕", type: "success" });
           }
-          this.files = this.files.filter((obj) => obj.newFilePath);
+          let newFiles = this.files.filter((obj) => obj.newFilePath);
           this.doneFiles = this.doneFiles.filter((obj) => {
             return (
-              this.files.findIndex(
+              newFiles.findIndex(
                 (item) => item.newFilePath == obj.newFilePath
               ) == -1
             );
           });
-          this.doneFiles = this.files.concat(this.doneFiles);
+          this.doneFiles = newFiles.concat(this.doneFiles);
           // let message =
           //     "转换完毕" +
           //     (this.errorCount ? "," + this.errorCount + "条错误。" : ""),
@@ -214,6 +214,8 @@ export default {
           this.$set(this.files[i], "status", "exception");
           Object.assign(this.files[i], newNameObj);
           done();
+        }else if(val=='log'){
+          console.log(newNameObj)
         } else {
           this.$set(this.files[i], "progress", val);
           if (val == 100) {
