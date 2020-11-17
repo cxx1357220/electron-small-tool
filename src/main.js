@@ -8,7 +8,7 @@ import store from './store'
 // Vue.use(ElementUI);
 import 'element-ui/lib/theme-chalk/index.css';
 
-import { Button, Select, Input, Progress, Card, Col,Row,Message} from 'element-ui';
+import { Button, Select, Input, Progress, Card, Col,Row,Message,Checkbox} from 'element-ui';
 Vue.use(Button)
 Vue.use(Select)
 Vue.use(Input)
@@ -16,6 +16,7 @@ Vue.use(Progress)
 Vue.use(Card)
 Vue.use(Col)
 Vue.use(Row)
+Vue.use(Checkbox)
 // Vue.use(Message)
 Vue.prototype.$message = Message
 Vue.config.productionTip = false

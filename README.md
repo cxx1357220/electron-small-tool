@@ -38,6 +38,9 @@ npm run serve
 npm run test
 
 ### build成程序
+先
+npm run build
+然后
 npm run build:mac
 npm run build:win
 
