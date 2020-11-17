@@ -3,19 +3,32 @@
     <el-row>
       <el-col :span="14" class="left-side">
         <div class="file-box">
-          <el-card v-for="(file,idx) in files" class="file-list">
-            <label>{{file.name}}</label>
+          <el-card v-for="(file, idx) in files" class="file-list">
+            <label>{{ file.name }}</label>
+            <p></p>
+            <el-checkbox v-if="file.type=='json'" :disabled="loading||!!file.status" v-model="file.checked"
+              >带表格格式json</el-checkbox
+            >
             <span>
-              <el-progress :percentage="file.progress" :status="file.status"></el-progress>
+              <el-progress
+                :percentage="file.progress"
+                :status="file.status"
+              ></el-progress>
             </span>
-            <span class="error" v-show="file.error">{{file.error}}</span>
+            <span class="error" v-show="file.error">{{ file.error }}</span>
             <div
               class="path"
               title="打开路径"
               v-show="file.newFilePath"
-              @click="openFinder(file.newFilePath,'file')"
-            >{{file.newFilePath}}</div>
-            <i class="el-icon-close" v-show="!loading" @click="delList(idx)"></i>
+              @click="openFinder(file.newFilePath, 'file')"
+            >
+              {{ file.newFilePath }}
+            </div>
+            <i
+              class="el-icon-close"
+              v-show="!loading"
+              @click="delList(idx)"
+            ></i>
           </el-card>
         </div>
         <el-button
@@ -23,37 +36,61 @@
           :disabled="loading"
           :loading="loading"
           @click="openFile"
-        >{{loading?'转换中':'添加文件'}}</el-button>
+          >{{ loading ? "转换中" : "添加文件" }}</el-button
+        >
       </el-col>
       <el-col :span="10" class="right-side">
-        <el-input size="mini" v-model="path" readonly placeholder="转换输出路径"></el-input>
+        <el-input
+          size="mini"
+          v-model="path"
+          readonly
+          placeholder="转换输出路径"
+        ></el-input>
         <div class="buttonList">
-          <el-button size="mini" @click="setPath" :disabled="loading" icon="el-icon-folder">选择输出路径</el-button>
+          <el-button
+            size="mini"
+            @click="setPath"
+            :disabled="loading"
+            icon="el-icon-folder"
+            >选择输出路径</el-button
+          >
           <el-button
             size="mini"
             @click="exportFile"
             type="primary"
             :loading="loading"
-            :disabled="lock||!path"
+            :disabled="lock || !path"
             icon="el-icon-document-copy"
-          >转换</el-button>
+            >转换</el-button
+          >
           <el-button
             size="mini"
             @click="openFinder(path)"
             :disabled="!path"
             icon="el-icon-folder-opened"
-          >打开路径</el-button>
+            >打开路径</el-button
+          >
         </div>
 
         <div class="file-box">
-          <el-card v-for="(file,idx) in doneFiles" class="file-list" shadow="hover">
-            <i class="el-icon-delete" @click="delFile(file.newFilePath,idx)" title="删除文件"></i>
-            <label>{{file.newName}}</label>
+          <el-card
+            v-for="(file, idx) in doneFiles"
+            class="file-list"
+            shadow="hover"
+          >
+            <i
+              class="el-icon-delete"
+              @click="delFile(file.newFilePath, idx)"
+              title="删除文件"
+            ></i>
+            <label>{{ file.newName }}</label>
             <div
               class="path"
               title="打开路径"
-              @click="openFinder(file.newFilePath,'file')"
-            >{{file.newFilePath}}</div>
+              @click="openFinder(file.newFilePath, 'file')"
+            >
+              {{ file.newFilePath }}
+            </div>
           </el-card>
         </div>
       </el-col>
@@ -163,10 +200,12 @@ export default {
             arr = a.split("\\");
           }
           let name = arr[arr.length - 1];
-          console.log(a, arr, name);
+          let fileName = name.split('.'),
+          type = fileName[fileName.length - 1].toLocaleLowerCase()
           return {
             path: a,
             name: name,
+            type:type
           };
         });
         this.files = this.files.concat(newFileList);
