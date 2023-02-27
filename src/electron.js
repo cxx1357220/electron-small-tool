@@ -5,7 +5,9 @@ const electron = require('electron')
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
-const { fork } = require('child_process');
+const {
+  fork
+} = require('child_process');
 const path = require('path')
 const fs = require('fs')
 const xlsx = require('node-xlsx');
@@ -92,21 +94,28 @@ ipc.on('hasPath', function (event, path) {
 // code. You can also put them in separate files and require them here.
 
 ipc.on('open-path-dialog', function (event, p) {
-  dialog.showOpenDialog({
-    properties: ['openDirectory'],
-    // properties: ['openFile','multiSelections'],
-    // filters: [
-    //   // { name: 'Images', extensions: ['jpg', 'png', 'gif',"tif"] },
-    //   // { name: 'All Files', extensions: ['json'] },
-    // ]
-  }, function (files) {
-    if (files) { event.sender.send('path', files[0]); console.log(files[0]) }
-  })
-    .then(files => {
-      if (files) { event.sender.send('path', files.filePaths[0]); console.log(files.filePaths[0]) }
-    }).catch(err => {
-      console.log(err)
-    });
+  if (process.env.NODE_ENV === 'development') {
+    dialog.showOpenDialog({
+      properties: ['openDirectory'],
+    }, function (files) {
+      if (files) {
+        event.sender.send('path', files[0]);
+        console.log(files[0])
+      }
+    })
+  } else {
+    dialog.showOpenDialog({
+        properties: ['openDirectory'],
+      })
+      .then(files => {
+        if (files) {
+          event.sender.send('path', files.filePaths[0]);
+          console.log(files.filePaths[0])
+        }
+      }).catch(err => {
+        console.log(err)
+      });
+  }
   // 很奇怪，loadURL走内部function，loadFILE走外部promise
 })
 
@@ -139,7 +148,11 @@ ipc.on('export', function (event, list, expPath, platform) {
     event.sender.send('console.log', 'exit');
     console.log('子进程已关闭，退出码 ' + code);
   });
-  forked.send({ list, expPath, platform })
+  forked.send({
+    list,
+    expPath,
+    platform
+  })
 })
 
 ipc.on('open-directory-dialog', function (event, p) {
@@ -167,27 +180,53 @@ ipc.on('open-directory-dialog', function (event, p) {
   //   }
   // })
 
+
+
   let extensions;
   if (p == 'xlsx') {
     extensions = ['xlsx', 'xls', 'json', 'csv']
   } else {
     extensions = ['json']
   }
-  dialog.showOpenDialog({
-    // properties: ['openFile', 'openDirectory']
-    properties: ['openFile', 'multiSelections'],
-    filters: [
-      // { name: 'Images', extensions: ['jpg', 'png', 'gif',"tif"] },
-      { name: 'All Files', extensions: extensions },
-    ]
-  }, function (files) {
-    if (files) { event.sender.send('files', files); }
-  })
-    .then(files => {
-      if (files) { event.sender.send('files', files.filePaths); }
-    }).catch(err => {
-      console.log(err)
-    });
+
+  if (process.env.NODE_ENV === 'development') {
+    dialog.showOpenDialog({
+      // properties: ['openFile', 'openDirectory']
+      properties: ['openFile', 'multiSelections'],
+      filters: [
+        // { name: 'Images', extensions: ['jpg', 'png', 'gif',"tif"] },
+        {
+          name: 'All Files',
+          extensions: extensions
+        },
+      ]
+    }, function (files) {
+      if (files) {
+        event.sender.send('files', files);
+      }
+    })
+  } else {
+    dialog.showOpenDialog({
+        // properties: ['openFile', 'openDirectory']
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+          // { name: 'Images', extensions: ['jpg', 'png', 'gif',"tif"] },
+          {
+            name: 'All Files',
+            extensions: extensions
+          },
+        ]
+      })
+      .then(files => {
+        if (files) {
+          event.sender.send('files', files.filePaths);
+        }
+      }).catch(err => {
+        console.log(err)
+      });
+  }
+
+
   // 很奇怪，loadURL走内部function，loadFILE走外部promise
 
 });

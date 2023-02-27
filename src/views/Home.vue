@@ -105,6 +105,7 @@
 // @ is an alias to /src
 import HelloWorld from "@/components/HelloWorld.vue";
 const electron = window.require("electron");
+const fs = window.require("fs");
 // import { electron } from 'electron'
 // if (window.require) {
 //   const electron = window.require("electron");
@@ -171,13 +172,22 @@ export default {
       this.files.splice(idx, 1);
     },
     delFile(path, idx) {
-      let callBack = electron.shell.moveItemToTrash(path);
-      if (callBack) {
-        this.$message("删除成功");
-        this.doneFiles.splice(idx, 1);
-      } else {
-        this.$message("找不到该文件");
-      }
+      // let callBack = electron.shell.moveItemToTrash(path);
+      fs.unlink(path,(err)=>{
+        console.log('err: ', err);
+        if(err){
+          this.$message(err.toString());
+        }else{
+          this.$message("删除成功");
+          this.doneFiles.splice(idx, 1);
+        }
+      })
+      // if (callBack) {
+      //   this.$message("删除成功");
+      //   this.doneFiles.splice(idx, 1);
+      // } else {
+      //   this.$message("找不到该文件");
+      // }
     },
   },
   created() {
